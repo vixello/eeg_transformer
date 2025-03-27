@@ -9,8 +9,8 @@ def download_BCI_IV_2a(path: str) -> None:
     zip_path: str = "./data/BCI_IV_2a.zip"
 
     if os.path.exists(path):
-        logger.info(f"Deleting old download data from {path}")
-        shutil.rmtree(path, ignore_errors=True)
+        logger.info(f"Dataset already downloaded in {path}")
+        return
 
     logger.info(f"Downloading data from {url}...")
     r = requests.get(url, stream=True)
@@ -36,8 +36,8 @@ def download_BCI_IV_2b(path: str) -> None:
     zip_path: str = "./data/BCI_IV_2b.zip"
 
     if os.path.exists(path):
-        logger.info(f"Deleting old download data from {path}")
-        shutil.rmtree(path, ignore_errors=True)
+        logger.info(f"Dataset already downloaded in {path}")
+        return
 
     logger.info(f"Downloading data from {url}...")
     r = requests.get(url, stream=True)
@@ -74,8 +74,8 @@ def create_subject_dir_structure_BCI_IV(path: str) -> None:
 def download_Physionet(path: str, num_patients: int = 109) -> None:
 
     if os.path.exists(path):
-        logger.info(f"Deleting old download data from {path}")
-        shutil.rmtree(path, ignore_errors=True)
+        logger.info(f"Dataset already downloaded in {path}")
+        return
 
     runs = [4, 8, 12]  # RUNS FOR MOTOR IMAGERY
     subject_list: list[int] = np.arange(1, num_patients + 1, 1).tolist()  # PATIENTS TO DOWNLOAD
