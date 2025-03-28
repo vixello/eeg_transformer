@@ -3,6 +3,44 @@ import numpy as np
 from mne.datasets.eegbci import load_data
 from eeg_logger import logger
 
+DATA_BASE_DIR: str = "./data"
+
+
+def download_BCI_III_3a(path: str) -> None:
+
+    urls: list[str] = [
+        "https://www.bbci.de/competition/download/competition_iii/graz/k3b.gdf",
+        "https://www.bbci.de/competition/download/competition_iii/graz/k6b.gdf",
+        "https://www.bbci.de/competition/download/competition_iii/graz/l1b.gdf",
+    ]
+
+    if os.path.exists(path):
+        logger.info(f"Dataset already downloaded in {path}")
+        return
+
+    for index, url in enumerate(urls):
+
+        subject_index: int = index + 1
+        subject_dir: str = f"{path}/S{subject_index}"
+
+        logger.info(f"Downloading data from {url}...")
+        r = requests.get(url, stream=True)
+        if r.status_code != 200:
+            logger.error(
+                f"Failed to download BCI III 3a dataset, subject {subject_index}. Status code: {r.status_code}"
+            )
+            continue
+
+        subject_dir: str = f"{path}/S{subject_index}"
+
+        if not os.path.exists(subject_dir):
+            os.makedirs(subject_dir)
+
+        with open(f"{subject_dir}/{subject_index}.gdf", "wb") as file:
+            for chunk in r.iter_content(1024):
+                file.write(chunk)
+        logger.info(f"Saved data in {subject_dir}")
+
 
 def download_BCI_IV_2a(path: str) -> None:
     url: str = "https://www.bbci.de/competition/download/competition_iv/BCICIV_2a_gdf.zip"
@@ -92,7 +130,7 @@ def download_Physionet(path: str, num_patients: int = 109) -> None:
         if not os.path.exists(dest_path):
             os.makedirs(dest_path)
         shutil.move(filename, dest_path)
-    logger.info(f"Files divided into subdirectories for all {num_patients} patients in {path}")
+    logger.info(f"Files divided into subdirectories for {num_patients} patients in {path}")
 
     # REMOVE CUSTOM MNE DIRECTORY
     shutil.rmtree(f"{path}/{custom_mne_dir}")
@@ -100,23 +138,25 @@ def download_Physionet(path: str, num_patients: int = 109) -> None:
 
 def main() -> None:
     dataset_name: str = sys.argv[1] if len(sys.argv) > 1 else ""
-    data_base_dir: str = "./data"
 
-    if not os.path.exists(data_base_dir):
-        os.makedirs(data_base_dir)
+    if not os.path.exists(DATA_BASE_DIR):
+        os.makedirs(DATA_BASE_DIR)
 
     match dataset_name:
+        case "bci3a":
+            download_BCI_III_3a(path=f"{DATA_BASE_DIR}/BCI_III_3a")
         case "bci2a":
-            download_BCI_IV_2a(path=f"{data_base_dir}/BCI_IV_2a")
+            download_BCI_IV_2a(path=f"{DATA_BASE_DIR}/BCI_IV_2a")
         case "bci2b":
-            download_BCI_IV_2b(path=f"{data_base_dir}/BCI_IV_2b")
+            download_BCI_IV_2b(path=f"{DATA_BASE_DIR}/BCI_IV_2b")
         case "physionet":
-            download_Physionet(path=f"{data_base_dir}/Physionet", num_patients=2)
+            download_Physionet(path=f"{DATA_BASE_DIR}/Physionet", num_patients=2)
         case _:
             logger.info("Downloading all datasets")
-            download_BCI_IV_2a(path=f"{data_base_dir}/BCI_IV_2a")
-            download_BCI_IV_2b(path=f"{data_base_dir}/BCI_IV_2b")
-            download_Physionet(path=f"{data_base_dir}/Physionet", num_patients=2)
+            download_BCI_III_3a(path=f"{DATA_BASE_DIR}/BCI_III_3a")
+            download_BCI_IV_2a(path=f"{DATA_BASE_DIR}/BCI_IV_2a")
+            download_BCI_IV_2b(path=f"{DATA_BASE_DIR}/BCI_IV_2b")
+            download_Physionet(path=f"{DATA_BASE_DIR}/Physionet", num_patients=2)
 
 
 if __name__ == "__main__":
