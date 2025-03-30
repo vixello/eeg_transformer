@@ -19,6 +19,7 @@ _________________________________________
 # 32766 | 0x7FFE | Start of a new run
 """
 
+
 def extract_epochs(data_path: str, save_path_root: str) -> None:
 
     if not os.path.exists(data_path):
@@ -30,15 +31,15 @@ def extract_epochs(data_path: str, save_path_root: str) -> None:
 
     for subject in subject_folders:
         subject_dir = os.path.join(data_path, subject)
-        
+
         subject_save_dir = os.path.join(save_directory, subject)
         os.makedirs(subject_save_dir, exist_ok=True)
-        
+
         train_data_files = [f for f in os.listdir(subject_dir) if f.endswith("T.gdf")]
         logger.info(f"Reading data from {subject}...")
 
-        for idx, train_file in  enumerate(train_data_files[:2], start=1):
-            train_file_path = os.path.join(subject_dir, train_file) 
+        for idx, train_file in enumerate(train_data_files[:2], start=1):
+            train_file_path = os.path.join(subject_dir, train_file)
 
             raw_train = mne.io.read_raw_gdf(train_file_path, eog=["EOG-left", "EOG-central", "EOG-right"], preload=True)
             train_epochs = __extract(raw_train)
@@ -54,24 +55,20 @@ def __extract(raw_data: mne.io.BaseRaw) -> mne.Epochs:
     logger.info(f"Event ids: {event_ids}")  # THIS IS IMPORTANT BECAUSE IT PROVIDES MAPPING TO EVENT IDS
     selected_event_id = None
 
-    if(event_ids['769'] == 10 and event_ids['770'] == 11):
+    if event_ids["769"] == 10 and event_ids["770"] == 11:
         logger.info("Using event IDs 769 and 770, mapping to 10 and 11 for left and right hand.")
-        selected_event_id = {"left_hand": 10, "right_hand": 11} 
+        selected_event_id = {"left_hand": 10, "right_hand": 11}
     else:
         logger.warning("Event values for IDs 769, 770 not matching 10 and 11, falling back to 4, 5.")
         selected_event_id = {"left_hand": 4, "right_hand": 5}
 
-
     # PICK ONLY EEG
     picks = mne.pick_types(raw_data.info, meg=False, eeg=True, eog=False, stim=False, exclude="bads")
-    tmin, tmax = 1.0, 4.0
 
     epochs = mne.Epochs(
         raw_data,
         events,
         event_id=selected_event_id,
-        # tmin=tmin,
-        # tmax=tmax,
         picks=picks,
         baseline=None,
         preload=True,

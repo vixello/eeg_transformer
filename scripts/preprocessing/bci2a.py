@@ -31,17 +31,17 @@ def extract_epochs(data_path: str, save_path_root: str) -> None:
 
     for subject in subject_folders:
 
-        train_data_file = os.path.join(data_path, subject, f"A{subject[1:3]}T.gdf")
+        data_file = os.path.join(data_path, subject, f"A{subject[1:3]}T.gdf")
 
         logger.info(f"Reading data from {subject}...")
-        raw_train = mne.io.read_raw_gdf(train_data_file, eog=["EOG-left", "EOG-central", "EOG-right"], preload=True)
-        train_epochs = __extract(raw_train)
+        raw = mne.io.read_raw_gdf(data_file, eog=["EOG-left", "EOG-central", "EOG-right"], preload=True)
+        epochs = __extract(raw)
 
         os.makedirs(os.path.join(save_directory, subject))
 
-        train_filename = os.path.join(save_directory, subject, f"PA{subject[1:3]}T-epo.fif")
-        train_epochs.save(train_filename)
-        logger.info(f"Training data for subject {subject[1:3]} saved as {train_filename}")
+        filename = os.path.join(save_directory, subject, f"PA{subject[1:3]}T-epo.fif")
+        epochs.save(filename)
+        logger.info(f"Preprocessed data for subject {subject[1:3]} saved as {filename}")
 
 
 def __extract(raw_data: mne.io.BaseRaw) -> mne.Epochs:
