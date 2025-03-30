@@ -25,3 +25,11 @@ If none is provided, it will download all datasets. Supported dataset names are:
 `bci2a` - for BCI Competition IV 2a  
 `bci2b` - for BCI Competition IV 2b  
 `physionet` - for Physionet
+
+### **preprocess.py**
+
+This script extracts expochs for selected dataset and saves them in predefined directory. It accepts dataset name as a starting param. If none is provided, it will not anything. Supported dataset names are:  
+`bci3a` - for BCI Competition III 3a  
+`bci2a` - for BCI Competition IV 2a  
+`bci2b` - for BCI Competition IV 2b  
+`physionet` - for Physionet
