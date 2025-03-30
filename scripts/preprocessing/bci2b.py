@@ -67,14 +67,14 @@ def __extract(raw_data: mne.io.BaseRaw) -> mne.Epochs:
 
     # PICK ONLY EEG
     picks = mne.pick_types(raw_data.info, meg=False, eeg=True, eog=False, stim=False, exclude="bads")
-    tmin, tmax = 0.0, 8.0
+    tmin, tmax = 1.0, 4.0
 
     epochs = mne.Epochs(
         raw_data,
         events,
         event_id=selected_event_id,
-        tmin=tmin,
-        tmax=tmax,
+        # tmin=tmin,
+        # tmax=tmax,
         picks=picks,
         baseline=None,
         preload=True,
