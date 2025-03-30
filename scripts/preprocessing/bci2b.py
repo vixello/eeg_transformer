@@ -38,8 +38,7 @@ def extract_epochs(data_path: str, save_path_root: str) -> None:
         subject_save_dir = os.path.join(save_directory, subject)
         os.makedirs(subject_save_dir, exist_ok=True)
 
-        idx = 1 
-        for train_file in train_data_files:
+        for idx, train_file in  enumerate(train_data_files[:2], start=1):
             train_file_path = os.path.join(subject_dir, train_file) 
 
             raw_train = mne.io.read_raw_gdf(train_file_path, eog=["EOG-left", "EOG-central", "EOG-right"], preload=True)
@@ -49,7 +48,6 @@ def extract_epochs(data_path: str, save_path_root: str) -> None:
             train_epochs.save(train_filename)
             logger.info(f"Training data for subject {subject[1:3]} saved as {train_filename}")
 
-            idx += 1  # Increment index
 
 
 
@@ -69,7 +67,7 @@ def __extract(raw_data: mne.io.BaseRaw) -> mne.Epochs:
 
     # PICK ONLY EEG
     picks = mne.pick_types(raw_data.info, meg=False, eeg=True, eog=False, stim=False, exclude="bads")
-    tmin, tmax = 2.0, 6.0
+    tmin, tmax = 0.0, 8.0
 
     epochs = mne.Epochs(
         raw_data,
