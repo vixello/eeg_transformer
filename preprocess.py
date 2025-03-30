@@ -1,5 +1,6 @@
 import os, sys
 import scripts.preprocessing.bci2a as bci2a
+import scripts.preprocessing.bci2b as bci2b
 from eeg_logger import logger
 from download import DATA_BASE_DIR
 
@@ -18,7 +19,7 @@ def main() -> None:
         case "bci2a":
             bci2a.extract_epochs(data_path=f"{DATA_BASE_DIR}/BCI_IV_2a", save_path_root=PREPROCESSED_DATA_BASE_DIR)
         case "bci2b":
-            pass
+            bci2b.extract_epochs(data_path=f"{DATA_BASE_DIR}/BCI_IV_2b", save_path_root=PREPROCESSED_DATA_BASE_DIR)
         case "physionet":
             pass
         case _:
