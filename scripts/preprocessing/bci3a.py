@@ -28,8 +28,6 @@ def extract_epochs(data_path: str, save_path_root: str) -> None:
     for subject in subject_folders:
         data_file = os.path.join(data_path, subject, f"{subject[1:3]}.gdf")
 
-        logger.info(f"Looking for file: {data_file}")
-
         if not os.path.exists(data_file):
             logger.warning(f"File {data_file} not found. Skipping subject {subject}")
             continue
@@ -40,7 +38,7 @@ def extract_epochs(data_path: str, save_path_root: str) -> None:
 
         os.makedirs(os.path.join(save_directory, subject), exist_ok=True)
 
-        filename = os.path.join(save_directory, subject, f"{subject[1:3]}.fif")
+        filename = os.path.join(save_directory, subject, f"{subject[1:3]}-epo.fif")
         epochs.save(filename)
         logger.info(f"Preprocessed data for subject {subject[1:3]} saved as {filename}")
 
@@ -49,8 +47,8 @@ def __extract(raw_data: mne.io.BaseRaw) -> mne.Epochs:
     events, event_ids = mne.events_from_annotations(raw_data)  # EXTRACT EVENTS
     logger.info(f"Event ids: {event_ids}")  # Log event IDs to verify they're correct
 
-    # Only keep events for left hand (1) and right hand (2) as specified in the dataset
-    selected_event_id = {"left_hand": 1, "right_hand": 2}  # Corrected event IDs based on dataset description
+    # Only keep events for left hand (3) and right hand (4) as specified in the dataset
+    selected_event_id = {"left_hand": 3, "right_hand": 4}  # Corrected event IDs based on dataset description
 
     # PICK ONLY EEG
     picks = mne.pick_types(raw_data.info, meg=False, eeg=True, eog=False, stim=False, exclude="bads")
