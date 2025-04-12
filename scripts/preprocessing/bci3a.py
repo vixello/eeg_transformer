@@ -16,7 +16,6 @@ _________________________________________
 """
 
 
-
 def extract_epochs(data_path: str, save_path_root: str) -> None:
     if not os.path.exists(data_path):
         logger.error(f"No data to preprocess in {data_path}")
@@ -66,7 +65,7 @@ def __extract(raw_data: mne.io.BaseRaw) -> mne.Epochs:
         picks=picks,
         baseline=None,
         preload=True,
-        event_repeated="merge"  # Handle repeated events by merging them
+        event_repeated="merge",  # Handle repeated events by merging them
     )
 
     logger.info(f"Number of epochs: {len(epochs)}")
