@@ -1,9 +1,10 @@
 import torch
+from numpy import ndarray
 from torch.utils.data import Dataset
 
 
 class EEGDataset(Dataset):
-    def __init__(self, X, y, cnn_mode=False):
+    def __init__(self, X: ndarray, y: ndarray, cnn_mode=False):
         self.X = torch.tensor(X, dtype=torch.float32)
         if cnn_mode:
             self.X = self.X.unsqueeze(1)  # CNN models require 4 dimensions

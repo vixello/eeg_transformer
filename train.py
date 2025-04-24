@@ -2,11 +2,18 @@ import numpy as np
 import torch
 import mne
 import os
+import sys
 from sklearn.model_selection import KFold
 from torch.utils.data import DataLoader
 
 from scripts.dataset.eeg_dataset import EEGDataset
-from scripts.models.transformer_models import SpatialTransformer, TemporalTransformer
+from scripts.models.transformer_models import (
+    SpatialTransformer,
+    TemporalTransformer,
+    SpatialCNNTransformer,
+    TemporalCNNTransformer,
+    FusionCNNTransformer,
+)
 import scripts.models.utils as utils
 from eeg_logger import logger
 
@@ -27,7 +34,43 @@ def load_subject_data(file_path: str) -> tuple[np.ndarray, np.ndarray]:
     return X, y
 
 
-def main() -> None:
+def create_model(model_name: str, test_data_shape: np.ndarray.shape) -> torch.nn.Module:
+    match model_name:
+        case "SpatialTransformer":
+            return SpatialTransformer(
+                input_size=test_data_shape[2],
+                d_model=utils.D_MODEL,
+                num_heads=utils.NUM_HEADS,
+                num_classes=utils.NUM_CLASSES,
+            )
+        case "TemporalTransformer":
+            return TemporalTransformer(
+                input_size=test_data_shape[1],
+                d_model=utils.D_MODEL,
+                num_heads=utils.NUM_HEADS,
+                num_classes=utils.NUM_CLASSES,
+            )
+        case "SpatialCNNTransformer":
+            return SpatialCNNTransformer(
+                d_model=utils.D_MODEL,
+                num_heads=utils.NUM_HEADS,
+                num_classes=utils.NUM_CLASSES,
+            )
+        case "TemporalCNNTransformer":
+            return TemporalCNNTransformer(
+                d_model=utils.D_MODEL,
+                num_heads=utils.NUM_HEADS,
+                num_classes=utils.NUM_CLASSES,
+            )
+        case "FusionCNNTransformer":
+            return FusionCNNTransformer(
+                d_model=utils.D_MODEL,
+                num_heads=utils.NUM_HEADS,
+                num_classes=utils.NUM_CLASSES,
+            )
+
+
+def train_model(model_name: str, cnn_mode: bool = False) -> None:
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if device == "cpu":
@@ -56,22 +99,39 @@ def main() -> None:
         X_train, X_test = all_X[train_idx], all_X[test_idx]
         y_train, y_test = all_y[train_idx], all_y[test_idx]
 
-        train_dataset = EEGDataset(X_train, y_train, cnn_mode=False)
-        test_dataset = EEGDataset(X_test, y_test, cnn_mode=False)
+        train_dataset = EEGDataset(X_train, y_train, cnn_mode=cnn_mode)
+        test_dataset = EEGDataset(X_test, y_test, cnn_mode=cnn_mode)
 
         train_loader = DataLoader(train_dataset, batch_size=utils.BATCH_SIZE, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=utils.BATCH_SIZE, shuffle=False)
 
-        model = SpatialTransformer(
-            input_size=X_train.shape[2], d_model=utils.D_MODEL, num_heads=utils.NUM_HEADS, num_classes=utils.NUM_CLASSES
-        )
+        model = create_model(model_name, X_train.shape)
 
-        logger.info(f"Training model in fold {fold + 1}...")
+        logger.info(f"Training {model_name} in fold {fold + 1}...")
         utils.train_model(model, train_loader, device, verbose=False)
 
         accuracy = utils.evaluate_model(model, test_loader, device)
-        logger.info(f"Accuracy for fold {fold + 1}: {accuracy * 100:.2f}%")
+        logger.info(f"Accuracy for {model_name}  in fold {fold + 1}: {accuracy * 100:.2f}%")
         accuracies.append(accuracy)
+
+    logger.info(f"Accuracy across 5 folds for {model_name}: {np.mean(accuracies) * 100:.2f}%")
+
+
+def main() -> None:
+
+    model_to_train: str = sys.argv[1] if len(sys.argv) > 1 else ""
+
+    match model_to_train:
+        case "spatial":
+            train_model("SpatialTransformer")
+        case "temporal":
+            train_model("TemporalTransformer")
+        case "spatialcnn":
+            train_model("SpatialCNNTransformer", cnn_mode=True)
+        case "temporalcnn":
+            train_model("TemporalCNNTransformer", cnn_mode=True)
+        case "fusion":
+            train_model("FusionCNNTransformer", cnn_mode=True)
 
 
 if __name__ == "__main__":

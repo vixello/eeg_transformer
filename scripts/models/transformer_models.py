@@ -58,7 +58,7 @@ class SpatialCNNTransformer(nn.Module):
     layer used 64 kernels with the size of 1 x 15, and adopted the VALID padding.
     """
 
-    def __init__(self, input_size, d_model: int, num_heads: int, num_classes: int):
+    def __init__(self, d_model: int, num_heads: int, num_classes: int):
         super(SpatialCNNTransformer, self).__init__()
         self.cnn = nn.Sequential(
             nn.Conv2d(1, 64, (1, 16), padding="same"),
@@ -92,7 +92,7 @@ class TemporalCNNTransformer(nn.Module):
     After the average pooling layer, we transposed the features.
     """
 
-    def __init__(self, input_size, d_model: int, num_heads: int, num_classes: int):
+    def __init__(self, d_model: int, num_heads: int, num_classes: int):
         super(TemporalCNNTransformer, self).__init__()
         self.cnn = nn.Sequential(nn.Conv2d(1, 64, kernel_size=(64, 1), padding="same"), nn.ReLU(), nn.AvgPool2d((1, 8)))
         self.embedding = nn.Linear(64, d_model)
@@ -112,10 +112,10 @@ class TemporalCNNTransformer(nn.Module):
 
 
 class FusionCNNTransformer(nn.Module):
-    def __init__(self, input_size, d_model: int, num_heads: int, num_classes: int):
+    def __init__(self, d_model: int, num_heads: int, num_classes: int):
         super(FusionCNNTransformer, self).__init__()
-        self.s_cnn = SpatialCNNTransformer(input_size, d_model, num_heads, num_classes)
-        self.t_cnn = TemporalCNNTransformer(input_size, d_model, num_heads, num_classes)
+        self.s_cnn = SpatialCNNTransformer(d_model, num_heads, num_classes)
+        self.t_cnn = TemporalCNNTransformer(d_model, num_heads, num_classes)
         self.fc = nn.Linear(num_classes * 2, num_classes)
 
     def forward(self, x: torch.Tensor):
