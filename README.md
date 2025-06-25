@@ -46,6 +46,7 @@ This scrips performs 5 fold cross validation for selected model. The final model
 ***
 # Results:
 
+Link to google sheets: https://docs.google.com/spreadsheets/d/1lR4EM3Ujfha6siqSPyEnna5T1k6iV_5kgzDTshopVXg/edit?usp=sharing
 
 | Model | Feature Method | Learning Rate | Average Accuracy(%) |
 | :---- | :---- | :---- | :---- |
